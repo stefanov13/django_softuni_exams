@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from ..plant.models import Plant
 
 def index(request):
 
@@ -6,5 +7,10 @@ def index(request):
 
 
 def catalogue(request):
+    plants = Plant.objects.all()
 
-    return render(request, 'common/catalogue.html')
+    context = {
+        'plants': plants
+    }
+
+    return render(request, 'common/catalogue.html', context=context)
