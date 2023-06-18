@@ -3,10 +3,10 @@ from django.core import validators
 from .validators import name_first_letter_capital
 
 # Create your models here.
-class Plant(models.Model):
+class Profile(models.Model):
     username = models.CharField(
         max_length=10,
-        validators=[validators.MaxLengthValidator(2)],
+        validators=[validators.MinLengthValidator(2)],
         blank=False,
         null=False,
     )
