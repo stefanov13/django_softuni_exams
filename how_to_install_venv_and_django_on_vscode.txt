@@ -1,0 +1,19 @@
+This tutorial is to installing 'venv', 'django' and 'psycopg2' on VSCode terminal in Windows 10 OS 
+
+First is necessary to create folder which hold all django projects
+In the VSCode terminal navigate to this folder
+To enable permission for install and run scripts write in power shell as administrator: Set-ExecutionPolicy bypass
+Then with command, install venv: python -m venv [venv_name]
+After finishing installation start venv with command: .\venv\Scripts\activate
+On the front of command line must (venv) appears
+Now we can install django with command: pip install django
+Is necessary to install and psycopg2 with command: pip install psycopg2
+Now good idea is to add in Emmet, extension for django in: File -> Preferences -> Settings -> Extensions -> Emmet -> Add Item.
+For 'Item' add 'django-html' and for 'Value' add 'html'.
+Finally can install extension for VSCode 'Django'. This extension install Snippets and Improved syntax for syntax highlighting.
+
+Create new project, start app and run server commands in VSCode terminal:
+
+To create new project write command: django-admin startproject [project_name] (venv must be started and (venv) must be appears in front of the line)
+To start (create) app use command: python .\manage.py startapp [app_name] (You must be in project folder in manage.py level)
+To run django server command is: python .\manage.py runserver (You must be in project folder in manage.py level)

@@ -1,0 +1,20 @@
+This tutorial is how to install 'Docker Desktop', 'Postgres SQL' and 'PG Admin' on Windows 10
+
+First download Docker Desktop for Windows from site: https://www.docker.com/products/docker-desktop/
+If WSL is not installed on Windows if must happened with command in power shell (as administrator): wsl --install
+After WSL installation finishing windows must be restarted.
+Now we can install Docker Desktop on Windows. When installation finishing is necessary to log off and log in again in windows account.
+
+If Docker Desktop is successful installed We can starting Postgres SQL installation: 
+>docker run -p 5432:5432 -e POSTGRES_USER=[postgres-user] -e POSTGRES_PASSWORD=[password] -d -v my-postgres-data:/var/lib/postgresql/data --name [custom-name] postgres:latest
+
+Now We can install and PG Admin with command:
+>docker run -p 5050:80 -e PGADMIN_DEFAULT_EMAIL=[some@email.com] -e PGADMIN_DEFAULT_PASSWORD=[password] -v my-data:/var/lib/pgadmin -d dpage/pgadmin4
+
+On Docker Desktop now We have this two containers. In the end of the row with PG Admin container, click on the triple dots and select 'Open with browser' option
+Now in default browser in new tab pg Admin is appears and ask for login. Log in to pg Admin with e-mail and password which set in installation command.
+In pg Admin we must register a server. On Dashboard tab click ot Add New Server icon.
+In Register - Server form in General tab for Name write wished name. In Connection tab for Host name/address we use: host.docker.internal
+in Username field write username for Postgres SQL which We set on installing.
+in Password field write password for Postgres SQL from the same place.
+Now click on Save button and our new server is created.
