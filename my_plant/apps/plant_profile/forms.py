@@ -16,3 +16,6 @@ class ProfileBaseForm(forms.ModelForm):
 
 class ProfileCreateForm(ProfileBaseForm):
     pass
+
+class ProfileEditForm(ProfileBaseForm):
+    fields = '__all__'
