@@ -19,6 +19,7 @@ class Album(models.Model):
         null=False,
         unique=True,
         max_length=30,
+        verbose_name='Album Name',
     )
 
     artist = models.CharField(
@@ -42,6 +43,7 @@ class Album(models.Model):
     image_url = models.URLField(
         blank=False,
         null=False,
+        verbose_name='Image URL',
     )
 
     price = models.FloatField(
