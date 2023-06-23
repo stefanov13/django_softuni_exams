@@ -1,0 +1,12 @@
+<section>
+    <ul>
+        {% for book in books %}
+            <li>{{ book.title }}</li>
+            {% if forloop.counter|divisibleby:3 %}
+                <ul>
+
+                </ul>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</section>
