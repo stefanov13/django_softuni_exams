@@ -31,6 +31,15 @@ class ProfileCreateForm(ProfileBaseForm):
             'password': '',
         }
 
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.__remove_fields_labels()
+
+    # def __remove_fields_labels(self):
+    #     for field in self.fields.values():
+    #         field.label = False
+
+
 class ProfileEditForm(ProfileBaseForm):
     class Meta:
         model = Profile
