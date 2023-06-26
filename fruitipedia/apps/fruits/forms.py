@@ -26,6 +26,14 @@ class FruitCreateForm(FruitBaseForm):
             'nutrition': '',
         }
 
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.__remove_fields_labels()
+
+    # def __remove_fields_labels(self):
+    #     for field in self.fields.values():
+    #         field.label = False
+
 class FruitEditForm(FruitBaseForm):
     pass
 
