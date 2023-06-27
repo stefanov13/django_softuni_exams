@@ -9,23 +9,23 @@ class Fruit(models.Model):
         null=False,
         max_length=30,
         validators=[validators.MinLengthValidator(2), name_content_only_letter],
-        verbose_name='Name',
+        verbose_name='Fruit Name',
     )
 
     image_url = models.URLField(
         blank=False,
         null=False,
-        verbose_name='Image URL',
+        verbose_name='Fruit Image URL',
     )
 
     description = models.TextField(
         blank=False,
         null=False,
-        verbose_name='Description',
+        verbose_name=' Fruit Description',
     )
 
     nutrition = models.TextField(
         blank=True,
         null=True,
-        verbose_name='Nutrition',
+        verbose_name='Nutrition Info',
     )

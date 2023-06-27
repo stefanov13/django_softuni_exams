@@ -12,32 +12,56 @@ class FruitBaseForm(forms.ModelForm):
 
     def __set_placeholders(self):
         for name, value in self.fields.items():
-            placeholder = name.split('_')
-            value.widget.attrs['placeholder'] = ' '.join(s.capitalize() for s in placeholder)
+            value.widget.attrs['placeholder'] = value.label   # If we have verbose_name setting up in model, we can use this method for adding placeholders
+            # placeholder = name.split('_')
+            # value.widget.attrs['placeholder'] = ' '.join(s.capitalize() for s in placeholder)
+
+    
 
 class FruitCreateForm(FruitBaseForm):
     class Meta:
         model = Fruit
-        exclude=[]
-        labels = {
-            'name': '',
-            'image_url': '',
-            'description': '',
-            'nutrition': '',
-        }
+        exclude = []
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.__remove_fields_labels()
+        ### Manual removal of labels ###
+         
+        # labels = {
+        #     'name': '',
+        #     'image_url': '',
+        #     'description': '',
+        #     'nutrition': '',
+        # }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__remove_fields_labels()
 
-    # def __remove_fields_labels(self):
-    #     for field in self.fields.values():
-    #         field.label = False
+    def __remove_fields_labels(self):
+        for field in self.fields.values():
+            field.label = False
 
 class FruitEditForm(FruitBaseForm):
-    pass
+    class Meta:
+        model = Fruit
+        exclude = []
+        labels = {
+            'name': 'Name',
+            'image_url': 'Image URL',
+            'description': 'Description',
+            'nutrition': 'Nutrition',
+        }
 
 class FruitDeleteForm(FruitBaseForm):
+    class Meta:
+        model = Fruit
+        exclude = []
+        labels = {
+            'name': 'Name',
+            'image_url': 'Image URL',
+            'description': 'Description',
+            'nutrition': 'Nutrition',
+        }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__set_disabled_fields()
