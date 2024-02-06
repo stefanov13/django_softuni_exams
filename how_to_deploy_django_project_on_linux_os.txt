@@ -1,0 +1,35 @@
+Първоначално трябва да направим папка /envs на ниво mange.py
+След това в папката правим файл с име .env
+
+В него ще запишем конфигурацията на следните променливи зададени в settings.py
+
+### За production environment ###
+
+1. DEBUG=0
+2. ALLOWED_HOSTS=" изброяваме хостовете със space "
+3. SECRET_KEY='django-insecure-0kk32qzln4o46fav0u+y%%@*5f7!kr#m@8_!8rfiqjxi!^-5j-m'
+4. DB_NAME='natfa_reg_office'
+5. DB_USER=penka  # Името на user-a с който се логваме в postgesql базата
+6. DB_PASSWORD=dolna # Паролата която сме задали за логин в базата
+7. DB_HOST=Хоста на който се намира базата
+8. DB_PORT=5432 # Порта на който слуша базата
+9. STATIC_ROOT=Задава се пълния път до папката със статичните файлове /static_files
+
+
+
+След това във файла settings.py задаваме на съответните променливи стойности, които взимаме от OS:
+
+Има два начина за взимане на стойност от os:
+
+Единият е с os.environ.get('KEY', 'DEFAULT')
+Другият е с os.getenv('KEY', 'DEFAULT')
+
+1. DEBUG = bool(int(os.getenv('DEBUG')))
+2. ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split()
+3. SECRET_KEY = os.getenv('SECRET_KEY', None)
+4. "NAME": os.getenv('DB_NAME', None)
+5. "USER": os.getenv('DB_USER', None)
+6. "PASSWORD": os.getenv('DB_PASSWORD', None)
+7. "HOST": os.getenv(DB_HOST, None)
+8. "PORT": os.getenv(DB_PORT, 5432)
+9. STATIC_ROOT = os.getenv(STATIC_ROOT, None)
