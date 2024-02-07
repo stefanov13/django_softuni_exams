@@ -24,7 +24,7 @@
 Единият е с os.environ.get('KEY', 'DEFAULT')
 Другият е с os.getenv('KEY', 'DEFAULT')
 
-1. DEBUG = bool(int(os.getenv('DEBUG')))
+1. DEBUG = bool(int(os.getenv('DEBUG', 0)))
 2. ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split()
 3. SECRET_KEY = os.getenv('SECRET_KEY', None)
 4. "NAME": os.getenv('DB_NAME', None)
