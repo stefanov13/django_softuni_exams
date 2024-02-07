@@ -8,7 +8,7 @@
 1. DEBUG=0
 2. ALLOWED_HOSTS=" изброяваме хостовете със space "
 3. SECRET_KEY='django-insecure-0kk32qzln4o46fav0u+y%%@*5f7!kr#m@8_!8rfiqjxi!^-5j-m-bmx56m'
-4. DB_NAME=Login name-а за аутентикация в Postgres-a
+4. DB_NAME=Името на базата в Postgres-a # В един контейнер може да има няколко бази с различни имена.
 5. DB_USER=denka  # Името на user-a с който се логваме в postgesql базата
 6. DB_PASSWORD=lelka # Паролата която сме задали за логин в базата
 7. DB_HOST=Хоста на който се намира базата
