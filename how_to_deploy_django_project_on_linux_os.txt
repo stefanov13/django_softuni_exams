@@ -15,6 +15,8 @@
 8. DB_PORT=5432 # Порта на който слуша базата
 9. STATIC_ROOT=Задава се пътя до папката в която ще се експортнат статичните файлове /app/static
 
+
+
 След това във файла settings.py задаваме на съответните променливи стойности, които взимаме от OS:
 
 Има два начина за взимане на стойност от os:
@@ -63,3 +65,15 @@ COPY static_files /app/static_files
 COPY media_files /app/media_files
 COPY templates /app/templates
 COPY manage.py /app/
+
+След като build-нем image-а с командата:
+
+docker build -t името на user-a/името на image-a:tag-a
+
+се логваме в hub.docker.com с команда от CLI:
+
+docker login
+
+и с команда за push-ване на image-a го качваме в hub.docker.com:
+
+docker push user-a/името на image-a:tag-app
