@@ -7,13 +7,13 @@
 
 1. DEBUG=0
 2. ALLOWED_HOSTS=" изброяваме хостовете със space "
-3. SECRET_KEY='django-insecure-0kk32qzln4o46fav0u+y%%@*5f7!kr#m@8_!8rfiqjxi!^-5j-m-bmx56m'
-4. DB_NAME=Името на базата в Postgres-a # В един контейнер може да има няколко бази с различни имена.
-5. DB_USER=denka  # Името на user-a с който се логваме в postgesql базата
-6. DB_PASSWORD=lelka # Паролата която сме задали за логин в базата
+3. SECRET_KEY=django-insecure-0kk32qzln4o46fav0u+y%%@*5f7!kr#m@8_!8rfiqjxi!^-5j-m
+4. DB_NAME=natfa_reg_office
+5. DB_USER=penka  # Името на user-a с който се логваме в postgesql базата
+6. DB_PASSWORD=dolna # Паролата която сме задали за логин в базата
 7. DB_HOST=Хоста на който се намира базата
 8. DB_PORT=5432 # Порта на който слуша базата
-9. STATIC_ROOT=Задава се пълния път до папката със статичните файлове /tmp/app-resources/static
+9. STATIC_ROOT=Задава се пълния път до папката със статичните файлове /app/static
 
 
 
@@ -33,3 +33,35 @@
 7. "HOST": os.getenv(DB_HOST, None)
 8. "PORT": os.getenv(DB_PORT, 5432)
 9. STATIC_ROOT = os.getenv(STATIC_ROOT, None)
+
+След като сме направили .env файл трябва да направим Dockerfile чрез който да build-нем docker image
+
+Тъй като ще ползваме requirements.txt за инсталиране на необходимите пакети за стартиране на application-a
+преди това трябва да инсталираме gunicorn и да го добавим във файла requirements.txt
+
+pip install gunicorn && pip freeze > requirements.txt
+
+Dockerfile има следното съдържание:
+
+FROM python:3
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# / - root directory (c:\)
+# WORKDIR /app -> mkdir /app && cd /app
+WORKDIR /app
+
+COPY requirements.txt /app/
+# Result: /app/requirements.txt
+
+RUN pip install -r requirements.txt
+
+# COPY . /app/
+COPY apps /app/apps
+COPY core /app.core
+COPY registry_office /app/registry_office
+COPY static_files /app/static_files
+COPY media_files /app/media_files
+COPY templates /app/templates
+COPY manage.py /app/
