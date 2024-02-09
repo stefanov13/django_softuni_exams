@@ -32,7 +32,13 @@
 6. "PASSWORD": os.getenv('DB_PASSWORD', None)
 7. "HOST": os.getenv(DB_HOST, None)
 8. "PORT": os.getenv(DB_PORT, 5432)
-9. STATIC_ROOT = os.getenv(STATIC_ROOT, None)
+9. STATIC_ROOT = os.getenv(STATIC_ROOT, BASE_DIR / 'static')
+
+Трябва да добавим в settings.py следната променлива:
+
+CSRF_TRUSTED_ORIGINS = [f'http://{x}' for x in os.environ.get('ALLOWED_HOSTS', '').split(' ')]
+
+Ако има нужда след {x}:81 мое да добавим и порт ако е различен от default-ния 80
 
 След като сме направили .env файл трябва да направим Dockerfile чрез който да build-нем docker image
 
@@ -59,7 +65,8 @@ RUN pip install -r requirements.txt
 
 # COPY . /app/
 COPY apps /app/apps
-COPY core /app.core
+COPY core /app/core
+COPY nginx /app/nginx
 COPY registry_office /app/registry_office
 COPY static_files /app/static_files
 COPY media_files /app/media_files
@@ -68,7 +75,10 @@ COPY manage.py /app/
 
 След като build-нем image-а с командата:
 
-docker build -t името на user-a/името на image-a:tag-a
+docker build -t името на user-a/името на image-a:tag-a .
+
+# Точката на края дефинира къде да се запише image-a след като се създаде. 
+В случая точката дефинира текущата дериктория в която се намираме.
 
 се логваме в hub.docker.com с команда от CLI:
 
@@ -76,4 +86,131 @@ docker login
 
 и с команда за push-ване на image-a го качваме в hub.docker.com:
 
-docker push user-a/името на image-a:tag-app
+docker push user-a/името на image-a:tag-a
+
+Създаваме docker-compose.yml file в който имаме следните секции
+
+1. Секция web (кръщаваме я както искаме) в нея ще се намира application-a
+Тя има следната конфигурацията
+
+web:
+    container_name: natfa_reg_office_app
+    # Ако искаме да build-ва image-a без да го ползва на готово трябва да имаме командата build
+    # Ако искаме да ползваме готов image от hub.docker нямаме нужда от build
+    # build: .
+    command: gunicorn --bind=0.0.0.0:8000 registry_office.wsgi:application
+    platform: linux/amd64
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./envs/.env
+    volumes:
+      - /tmp/registry_office/static:/app/static
+    links:
+      - postgres
+    image: lokumchev/registry_office
+
+Тъй като не е добре да има .env file в image-a (а то и няма) трябва да го добавим в него след като го изтеглим
+с командата
+
+docker compose exec web bash
+
+Така влизаме в bash шела на контейнера и можем да правим промени в него.
+Навигираме до нивото на manage.py и създаваме директория /envs и в нея file с име .env
+С текстов редактор (vim) копираме съдържанието от готовия .env file в този, който сме създали в контейнера и го записваме.
+Сега вече имаме environment variables към image-a на application-a
+
+2. Секция postgres. В нея правим следната конфигурация за контейнера на базата данни PostgreSQL
+Тя изглежда Така
+
+postgres:
+    container_name: natfa_postgres_db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: 1123QwER
+      POSTGRES_USER: postgres
+      POSTGRES_DB: db_name
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - /db/postgresql:/var/lib/postgresql/data
+    image: postgres
+
+За да можем да ползваме статичните файлове добавяме и nginx server image
+За да работи nginx трябва да направим конфигурация на нивото на manage.py
+Създаваме папка ./nginx в която създаваме друга папка ./conf.d и в нея
+file с име web.conf, който има следната конфигурация:
+
+upstream registry_office {
+    server web:8000;
+}
+
+server {
+    listen 80;
+
+    server_name <host>; // Само хоста на който реално работи приложението без http://.
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        proxy_pass http://host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+    }
+
+    location /static/ {
+            alias /home/app/web/staticfiles/;
+    }
+}
+
+3. Секция nginx, която има конфигурация в docker-compose.yml:
+
+nginx:
+    container_name: registry_office_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /tmp/registry_office/static:/home/app/web/staticfiles
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/logs:/var/log/nginx
+      - ./certbot/www:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
+    links:
+      - web
+    image: nginx
+
+4. Ако искаме да имаме PG Admin добавяме и конфигурация за него
+
+pgadmin:
+    container_name: registry_office_pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: some@email.com
+      PGADMIN_DEFAULT_PASSWORD: some_password
+    volumes:
+      - /pgadmin: /var/lib/pgadmin
+    links:
+      - postgres
+    image: dpage/pgadmin4
+
+
+На края стартираме само контейнера на приложението (web) с командата
+
+docker compose up -d web
+
+След това изпълняваме командите за colectstatic and migrate
+Те се изпълняват само ако има промени респективно в статичните файлове
+или в моделите и има нови миграции.
+
+docker compose exec web python manage.py collectstatic
+docker compose exec web python manage.py migrate
+
+Като финал се пускат всички контейнери с командата
+
+docker compose up -d
