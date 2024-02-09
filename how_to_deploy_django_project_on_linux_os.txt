@@ -184,7 +184,7 @@ nginx:
       - web
     image: nginx
 
-4. Ако искаме да имаме PG Admin добавяме и конфигурация за него
+4. Секция pgadmin. Ако искаме да имаме PG Admin добавяме и конфигурация за него
 
 pgadmin:
     container_name: registry_office_pgadmin
