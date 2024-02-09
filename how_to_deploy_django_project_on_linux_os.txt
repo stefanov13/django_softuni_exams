@@ -30,9 +30,9 @@
 4. "NAME": os.getenv('DB_NAME', None)
 5. "USER": os.getenv('DB_USER', None)
 6. "PASSWORD": os.getenv('DB_PASSWORD', None)
-7. "HOST": os.getenv(DB_HOST, None)
-8. "PORT": os.getenv(DB_PORT, 5432)
-9. STATIC_ROOT = os.getenv(STATIC_ROOT, BASE_DIR / 'static')
+7. "HOST": os.getenv('DB_HOST', None)
+8. "PORT": os.getenv('DB_PORT', 5432)
+9. STATIC_ROOT = os.getenv('STATIC_ROOT', BASE_DIR / 'static')
 
 Трябва да добавим в settings.py следната променлива:
 
@@ -63,7 +63,7 @@ COPY requirements.txt /app/
 
 RUN pip install -r requirements.txt
 
-# COPY . /app/
+# COPY . /app/ # If we want to copy all files and directories
 COPY apps /app/apps
 COPY core /app/core
 COPY nginx /app/nginx
@@ -184,7 +184,7 @@ nginx:
       - web
     image: nginx
 
-4. Секция pgadmin. Ако искаме да имаме PG Admin добавяме и конфигурация за него
+4. Ако искаме да имаме PG Admin добавяме и конфигурация за него
 
 pgadmin:
     container_name: registry_office_pgadmin
