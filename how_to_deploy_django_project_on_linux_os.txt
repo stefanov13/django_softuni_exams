@@ -88,7 +88,8 @@ docker login
 
 docker push user-a/името на image-a:tag-a
 
-Създаваме docker-compose.yml file в който имаме следните секции
+Създаваме docker-compose.yml file в /app на машината, на която ще работи приловението,
+който имаме следните секции
 
 1. Секция web (кръщаваме я както искаме) в нея ще се намира application-a
 Тя има следната конфигурацията
@@ -200,9 +201,9 @@ pgadmin:
     image: dpage/pgadmin4
 
 
-На края стартираме само контейнера на приложението (web) с командата
+На края стартираме с командата
 
-docker compose up -d web
+docker compose up -d
 
 След това изпълняваме командите за colectstatic and migrate
 Те се изпълняват само ако има промени респективно в статичните файлове
@@ -210,7 +211,3 @@ docker compose up -d web
 
 docker compose exec web python manage.py collectstatic
 docker compose exec web python manage.py migrate
-
-Като финал се пускат всички контейнери с командата
-
-docker compose up -d
