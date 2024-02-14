@@ -99,7 +99,7 @@ web:
     # Ако искаме да build-ва image-a без да го ползва на готово трябва да имаме командата build
     # Ако искаме да ползваме готов image от hub.docker нямаме нужда от build
     # build: .
-    command: gunicorn --bind=0.0.0.0:8000 registry_office.wsgi:application
+    command: gunicorn --bind=0.0.0.0:8000 registry_office.wsgi:application --error-logfile /var/log/gunicorn/error.log --access-logfile /var/log/gunicorn/access.log
     platform: linux/amd64
     ports:
       - "8000:8000"
@@ -107,8 +107,10 @@ web:
       - ./envs/.env
     volumes:
       - /tmp/registry_office/static:/app/static
-    links:
-      - postgres
+      - /registry_office/media_files:/app/media_files
+      - /var/log/gunicorn:/var/log/gunicorn
+    networks:
+      - natfa
     image: lokumchev/registry_office
 
 Тъй като не е добре да има .env file в image-a (а то и няма) трябва да го добавим в него след като го изтеглим
@@ -165,6 +167,10 @@ server {
 
     location /static/ {
             alias /home/app/web/staticfiles/;
+    }
+
+    location /media_files/ {
+            alias /home/app/web/mediafiles/;
     }
 }
 
