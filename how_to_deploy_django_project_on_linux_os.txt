@@ -38,7 +38,7 @@
 
 CSRF_TRUSTED_ORIGINS = [f'http://{x}' for x in os.environ.get('ALLOWED_HOSTS', '').split(' ')]
 
-Ако има нужда след {x}:81 мое да добавим и порт ако е различен от default-ния 80
+Ако има нужда след {x}:81 може да добавим и порт ако е различен от default-ния 80
 
 След като сме направили .env файл трябва да направим Dockerfile чрез който да build-нем docker image
 
@@ -66,10 +66,8 @@ RUN pip install -r requirements.txt
 # COPY . /app/ # If we want to copy all files and directories
 COPY apps /app/apps
 COPY core /app/core
-COPY nginx /app/nginx
 COPY registry_office /app/registry_office
 COPY static_files /app/static_files
-COPY media_files /app/media_files
 COPY templates /app/templates
 COPY manage.py /app/
 
@@ -88,7 +86,7 @@ docker login
 
 docker push user-a/името на image-a:tag-a
 
-Създаваме docker-compose.yml file в /app на машината, на която ще работи приловението,
+Създаваме docker-compose.yml file в /app на машината, на която ще работи приложението,
 който имаме следните секции
 
 1. Секция web (кръщаваме я както искаме) в нея ще се намира application-a
@@ -106,22 +104,18 @@ web:
     env_file:
       - ./envs/.env
     volumes:
-      - /tmp/registry_office/static:/app/static
+      - /registry_office/static:/app/static
       - /registry_office/media_files:/app/media_files
       - /var/log/gunicorn:/var/log/gunicorn
+      - /var/log/registry_office:/logs # If we have logger in settings.py
     networks:
       - natfa
     image: lokumchev/registry_office
 
-Тъй като не е добре да има .env file в image-a (а то и няма) трябва да го добавим в него след като го изтеглим
-с командата
+Тъй като не е добре да има .env file в image-a (а то и няма) трябва да го добавим в директорията
+/app/envs/.env
 
-docker compose exec web bash
-
-Така влизаме в bash шела на контейнера и можем да правим промени в него.
-Навигираме до нивото на manage.py и създаваме директория /envs и в нея file с име .env
-С текстов редактор (vim) копираме съдържанието от готовия .env file в този, който сме създали в контейнера и го записваме.
-Сега вече имаме environment variables към image-a на application-a
+Сега вече имаме environment variables към секция 1 в docker-compose.yml файла
 
 2. Секция postgres. В нея правим следната конфигурация за контейнера на базата данни PostgreSQL
 Тя изглежда Така
@@ -141,9 +135,9 @@ postgres:
     image: postgres
 
 За да можем да ползваме статичните файлове добавяме и nginx server image
-За да работи nginx трябва да направим конфигурация на нивото на manage.py
+За да работи nginx трябва да направим конфигурация в директория /app
 Създаваме папка ./nginx в която създаваме друга папка ./conf.d и в нея
-file с име web.conf, който има следната конфигурация:
+file с име nginx.conf, който има следната конфигурация:
 
 upstream registry_office {
     server web:8000;
@@ -159,14 +153,19 @@ server {
     }
 
     location / {
-        proxy_pass http://host;
+        proxy_pass http://host; # Host-а трябва да бъде този който е написан след upstream !
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
         proxy_redirect off;
+        client_max_body_size 20M;
     }
 
     location /static/ {
             alias /home/app/web/staticfiles/;
+    }
+
+    location = /favicon.ico {
+            alias /home/app/web/static/images/favicon.ico;
     }
 
     location /media_files/ {
@@ -182,13 +181,17 @@ nginx:
       - "80:80"
       - "443:443"
     volumes:
-      - /tmp/registry_office/static:/home/app/web/staticfiles
+      - /registry_office/static:/home/app/web/staticfiles
+      - /registry_office/media_files:/home/app/web/mediafiles/
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/logs:/var/log/nginx
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
     links:
       - web
+    # It possible to be and with network:
+    # networks:
+    #   - natfa
     image: nginx
 
 4. Ако искаме да имаме PG Admin добавяме и конфигурация за него
@@ -204,6 +207,9 @@ pgadmin:
       - /pgadmin: /var/lib/pgadmin
     links:
       - postgres
+    # It possible to be and with network:
+    # networks:
+    #   - natfa
     image: dpage/pgadmin4
 
 
@@ -217,3 +223,7 @@ docker compose up -d
 
 docker compose exec web python manage.py collectstatic
 docker compose exec web python manage.py migrate
+
+За да сме сигурни, че nginx е заредил статичните файлове, рестартираме контейнера му
+
+docker compose restart nginx
